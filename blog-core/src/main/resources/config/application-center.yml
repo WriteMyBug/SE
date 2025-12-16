@@ -6,9 +6,9 @@ spring:
       driver-class-name: com.mysql.cj.jdbc.Driver
       test-while-idle: false
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://${ONEBLOG_DATASOURCE_HOST:127.0.0.1}:${ONEBLOG_DATASOURCE_PORT:3306}/${ONEBLOG_DATASOURCE_DATABASE_NAME:dblog}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&useSSL=false&allowPublicKeyRetrieval=true&useLegacyDatetimeCode=false
-    username: ${ONEBLOG_DATASOURCE_USERNAME:root}
-    password: ${ONEBLOG_DATASOURCE_PASSWORD:123456}
+    url: jdbc:mysql://127.0.0.1:3306/dblog?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&autoReconnect=true&zeroDateTimeBehavior=convertToNull&allowMultiQueries=true&useSSL=false&allowPublicKeyRetrieval=true&useLegacyDatetimeCode=false
+    username: root
+    password: 123456
 
   ####### Redis Config #######
   redis:
