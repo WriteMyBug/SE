@@ -12,27 +12,141 @@
                 <li><a href="${config.siteUrl}/links" class="menu_a" title="友情链接" data-toggle="tooltip" data-placement="bottom">友情链接</a></li>
                 <li><a href="${config.siteUrl}/guestbook" class="menu_a" title="友情链接" data-toggle="tooltip" data-placement="bottom">留言板</a></li>
             </ul>
-            <#if user??>
-                <ul class="list-unstyled list-inline nav navbar-nav">
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle menu_a" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-user fa-fw"></i>${user.username!} <span class="caret"></span></a>
-                        <ul class="dropdown-menu" role="menu">
-                            <li><a href="/oauth/logout"><i class="fa fa-sign-out"></i>退出</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            <#else>
-            <@zhydTag method="listAvailableOAuthPlatforms">
-            <#if listAvailableOAuthPlatforms?? && listAvailableOAuthPlatforms?size gt 0>
-                <ul class="list-unstyled list-inline pull-left">
-                    <li><a href="javascript:;;" data-toggle="modal" data-target="#oauth" rel="nofollow" title="授权登录">登录</a></li>
-                </ul>
-            </#if>
-                </@zhydTag>
-            </#if>
         </div>
     </div>
 </nav>
+
+<style>
+    /* 用户头像下拉菜单样式 */
+    .user-avatar-dropdown {
+        position: relative;
+    }
+    
+    .user-avatar-img {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .user-avatar-img:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .avatar-toggle {
+        padding: 8px 12px !important;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .avatar-dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        min-width: 150px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        margin-top: 5px;
+        padding: 5px 0;
+        z-index: 1000;
+    }
+    
+    .avatar-dropdown-menu li {
+        list-style: none;
+    }
+    
+    .avatar-dropdown-menu li a {
+        display: block;
+        padding: 8px 15px;
+        color: #333;
+        text-decoration: none;
+        transition: background-color 0.2s;
+    }
+    
+    .avatar-dropdown-menu li a:hover {
+        background-color: #f5f5f5;
+        color: #337ab7;
+    }
+    
+    .avatar-dropdown-menu li a i {
+        margin-right: 8px;
+        width: 16px;
+        text-align: center;
+    }
+    
+    .avatar-dropdown-menu::before {
+        content: '';
+        position: absolute;
+        top: -6px;
+        right: 15px;
+        width: 0;
+        height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-bottom: 6px solid #fff;
+    }
+    
+    .avatar-dropdown-menu::after {
+        content: '';
+        position: absolute;
+        top: -7px;
+        right: 14px;
+        width: 0;
+        height: 0;
+        border-left: 7px solid transparent;
+        border-right: 7px solid transparent;
+        border-bottom: 7px solid #ddd;
+        z-index: -1;
+    }
+</style>
+<script>
+    // 退出登录
+    function logout() {
+        $.post('/api/auth/logout', function(response) {
+            if (response.status == 200) {
+                window.location.reload();
+            } else {
+                alert('退出失败：' + response.message);
+            }
+        });
+    }
+    
+    // 头像下拉菜单功能
+    $(document).ready(function() {
+        // 头像下拉菜单交互
+        $('.avatar-toggle').on('click', function(e) {
+            e.preventDefault();
+            var dropdown = $(this).closest('.user-avatar-dropdown');
+            var menu = dropdown.find('.avatar-dropdown-menu');
+            
+            // 切换显示状态
+            menu.toggle();
+            
+            // 阻止事件冒泡
+            e.stopPropagation();
+        });
+        
+        // 点击页面其他地方关闭下拉菜单
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.user-avatar-dropdown').length) {
+                $('.avatar-dropdown-menu').hide();
+            }
+        });
+        
+        // 鼠标悬停效果增强
+        $('.user-avatar-dropdown').on('mouseenter', function() {
+            $(this).find('.user-avatar-img').css('transform', 'scale(1.1)');
+        }).on('mouseleave', function() {
+            $(this).find('.user-avatar-img').css('transform', 'scale(1)');
+        });
+    });
+</script>
 <div class="modal" id="oauth" tabindex="-1" role="dialog" aria-labelledby="oauthTitle">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -115,6 +229,24 @@
                         </#list>
                     </#if>
                 </@zhydTag>
+                
+                <!-- 用户认证相关菜单 -->
+                <#if user??>
+                    <li class="dropdown user-avatar-dropdown">
+                        <a href="#" class="dropdown-toggle avatar-toggle" data-toggle="dropdown" aria-expanded="false">
+                            <img src="/img/user.png" alt="用户头像" class="user-avatar-img">
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu avatar-dropdown-menu" role="menu">
+                            <li><a href="/profile"><i class="fa fa-user-circle"></i>个人信息</a></li>
+                            <li><a href="javascript:void(0)" onclick="logout()"><i class="fa fa-sign-out"></i>退出登录</a></li>
+                        </ul>
+                    </li>
+                <#else>
+                    <li><a href="/login" class="menu_a"><i class="fa fa-sign-in"></i>登录</a></li>
+                    <li><a href="/register" class="menu_a"><i class="fa fa-user-plus"></i>注册</a></li>
+                </#if>
+                
                 <li><span class="pull-right nav-search main-search" data-toggle="modal" data-target=".nav-search-box"><i class="fa fa-search"></i></span></li>
             </ul>
         </div>

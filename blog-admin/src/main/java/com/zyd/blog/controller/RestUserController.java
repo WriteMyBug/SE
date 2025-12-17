@@ -15,10 +15,9 @@ import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 用户管理
@@ -116,4 +115,26 @@ public class RestUserController {
         return ResultUtil.success(ResponseStatus.SUCCESS);
     }
 
+    @PostMapping("/register")
+    @ResponseBody
+    public ResponseVO register(@Validated User user, String confirmPassword, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return ResultUtil.error(bindingResult.getFieldError().getDefaultMessage());
+        }
+        if (!user.getPassword().equals(confirmPassword)) {
+            return ResultUtil.error("两次密码输入不一致");
+        }
+        if (userService.getByUserName(user.getUsername()) != null) {
+            return ResultUtil.error("用户名已存在");
+        }
+        try {
+            user.setPassword(PasswordUtil.encrypt(user.getPassword(), user.getUsername()));
+            user.setStatus(1); // 启用状态
+            userService.insert(user);
+            return ResultUtil.success("注册成功");
+        } catch (Exception e) {
+//            log.error("注册失败", e);
+            return ResultUtil.error("注册失败");
+        }
+    }
 }

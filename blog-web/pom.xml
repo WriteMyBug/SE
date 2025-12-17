@@ -38,7 +38,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>com.zyd</groupId>
+            <artifactId>blog-core</artifactId>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>

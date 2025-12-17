@@ -2,6 +2,242 @@
 <@header title="${article.title} | ${config.siteName}" keywords="${article.keywords!},${config.siteName}" description="${article.description!}"
     canonical="/article/${article.id}" hasEditor=true>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css" />
+    <style>
+        /* 提示消息样式 - 仅适用于自定义提示 */
+        #alertMessage {
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            display: none;
+        }
+        .alert-success {
+            background-color: #dff0d8;
+            border: 1px solid #d6e9c6;
+            color: #3c763d;
+        }
+        .alert-error {
+            background-color: #f2dede;
+            border: 1px solid #ebccd1;
+            color: #a94442;
+        }
+        
+        /* Bootstrap alert 样式增强 */
+        .alert-warning {
+            background-color: #fcf8e3;
+            border: 1px solid #faebcc;
+            color: #8a6d3b;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        
+        .alert-dismissible {
+            padding-right: 35px;
+            position: relative;
+        }
+        
+        .alert-dismissible .close {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 15px;
+            color: inherit;
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            opacity: 0.5;
+        }
+        
+        .alert-dismissible .close:hover {
+            opacity: 0.8;
+        }
+        
+        /* 响应式alert样式 */
+        @media (max-width: 768px) {
+            .alert-warning {
+                padding: 12px;
+                font-size: 14px;
+            }
+            
+            .alert-dismissible {
+                padding-right: 30px;
+            }
+            
+            .alert-dismissible .close {
+                padding: 12px;
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .alert-warning {
+                padding: 10px;
+                font-size: 13px;
+                margin: 15px 0;
+            }
+            
+            .alert-dismissible {
+                padding-right: 25px;
+            }
+            
+            .alert-dismissible .close {
+                padding: 10px;
+                font-size: 14px;
+            }
+        }
+        .alert-success {
+            background-color: #dff0d8;
+            border: 1px solid #d6e9c6;
+            color: #3c763d;
+        }
+        .alert-error {
+            background-color: #f2dede;
+            border: 1px solid #ebccd1;
+            color: #a94442;
+        }
+        
+        /* 横向按钮布局 */
+        
+        .button-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .button-group .like,
+        .button-group .share-s {
+            float: none;
+            margin: 0;
+        }
+        
+        .button-group .like a,
+        .button-group .share-s a {
+            margin: 0;
+            width: 120px;
+            text-align: center;
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: all 0.2s ease-in;
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            display: inline-block;
+            color: #333;
+        }
+        
+        .button-group .like a:hover,
+        .button-group .share-s a:hover {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        /* 收藏按钮样式 */
+        .button-group .favorite a {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            width: 120px;
+            display: block;
+            padding-left: 15px;
+        }
+        
+        .button-group .favorite a:hover {
+            background: rgba(255, 193, 7, 0.08) !important;
+            color: #ffc107 !important;
+            border-color: rgba(255, 193, 7, 0.3) !important;
+        }
+        
+        .button-group .favorite a:hover .fa-star {
+            color: #ffc107 !important;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .button-group {
+                gap: 10px;
+            }
+            
+            .button-group .like a,
+            .button-group .share-s a,
+            .button-group .favorite a {
+                width: 100px;
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+            
+            #share {
+                margin-left: 60px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .button-group {
+                gap: 8px;
+            }
+            
+            .button-group .like a,
+            .button-group .share-s a,
+            .button-group .favorite a {
+                width: 90px;
+                padding: 5px 10px;
+                font-size: 13px;
+            }
+            
+            #share {
+                margin-left: 50px;
+            }
+        }
+        
+        @media (max-width: 320px) {
+            .button-group {
+                gap: 6px;
+            }
+            
+            .button-group .like a,
+            .button-group .share-s a,
+            .button-group .favorite a {
+                width: 80px;
+                padding: 4px 8px;
+                font-size: 12px;
+            }
+            
+            #share {
+                margin-left: 40px;
+            }
+        }
+        
+        /* 分享下拉框位置调整 */
+        .social-main {
+            position: relative;
+            width: auto;
+            margin: 20px 0;
+        }
+        
+        #share {
+            position: absolute;
+            top: auto;
+            bottom: 50px;
+            right: auto;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-left: 80px;
+            z-index: 1000;
+        }
+        
+        @media (max-width: 768px) {
+            #share {
+                margin-left: 60px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #share {
+                margin-left: 50px;
+            }
+        }
+    </style>
 </@header>
 <#if article.coverImage??>
     <img src="${article.coverImage!}" onerror="this.src='${config.staticWebSite}/img/default.png'" style="display: none;" id="cover-img">
@@ -56,16 +292,34 @@
                                 </div>
                             </div>
                         </#if>
+                        <#-- 加密文章处理：需要认证的文章 -->
                         <#if article.requiredAuth>
-                            <div class="alert alert-warning alert-dismissible fade in red" role="alert">
-                                <i class="fa fa-lock fa-fw"></i> 该文章已被加密，需要 <a href="javascript:void(0)" data-toggle="modal" data-target="#oauth" rel="nofollow" title="授权登录">登录后</a> 才能查看文章详情
-                            </div>
+                            <#-- 如果用户未登录，显示登录提醒 -->
+                            <#if !user??>
+                                <div class="alert alert-warning alert-dismissible fade in" role="alert">
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    <i class="fa fa-lock fa-fw"></i> 该文章已被加密，需要 <a href="/login" style="color: #8a6d3b; text-decoration: underline;">登录</a> 后才能查看文章详情
+                                </div>
+                            <#-- 如果用户已登录但仍无权限，显示权限不足提醒 -->
+                            <#else>
+                                <div class="alert alert-warning alert-dismissible fade in" role="alert">
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    <i class="fa fa-lock fa-fw"></i> 您当前账号权限不足，无法查看该加密文章
+                                </div>
+                            </#if>
                         <#else >
                             <#if article.private>
                                 ${article.description!}
 
                                 <br>
-                                <div class="alert alert-warning alert-dismissible fade in red" role="alert">
+                                <div class="alert alert-warning alert-dismissible fade in" role="alert">
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
                                     <i class="fa fa-lock fa-fw"></i> 文章已被加密，需要 <a href="javascript:void(0)" data-toggle="modal" data-target="#lockModal">输入密码</a> 才能查看文章详情
                                 </div>
                             <#else >
@@ -74,31 +328,36 @@
                         </#if>
                     </div>
                     <div class="separateline"><span>正文到此结束</span></div>
+                    <#-- 提示消息区域 -->
+                    <div id="alertMessage" class="alert" style="display: none; margin: 20px 0; padding: 15px; border-radius: 4px;"></div>
                     <div id="social" style="margin-bottom: 45px;">
                         <div class="social-main">
-                            <span class="like">
-                                <a href="javascript:;" data-id="${article.id?c}" title="点赞" ><i class="fa fa-thumbs-up"></i>赞 <i class="count"> ${article.loveCount!(0)}</i> </a>
-                            </span>
-                            <div class="shang-p">
-                                <div class="shang-empty"><span></span></div>
-                                <span class="shang-s"><a onclick="PaymentUtils.show();" style="cursor:pointer">赏</a> </span>
+                            <div class="button-group">
+                                <span class="like">
+                                    <a href="javascript:;" data-id="${article.id?c}" title="点赞" ><i class="fa fa-thumbs-up"></i>赞 <i class="count"> ${article.loveCount!(0)}</i> </a>
+                                </span>
+                                <#-- 收藏按钮 - 仅对登录用户可见 -->
+                                <#if user??>
+                                <span class="like favorite">
+                                    <a href="javascript:;" data-id="${article.id?c}" title="收藏" onclick="showFavoriteSuccess('${article.id?c}')"><i class="fa fa-star"></i>收藏</a>
+                                </span>
+                                </#if>
+                                <span class="share-s">
+                                    <a href="javascript:void(0)" id="share-s" title="分享"><i class="fa fa-share-alt"></i>分享</a>
+                                </span>
                             </div>
-                            <div class="share-sd">
-                                <span class="share-s"><a href="javascript:void(0)" id="share-s" title="分享"><i class="fa fa-share-alt"></i>分享</a></span>
-                                <div id="share" style="display: none">
-                                    <div class="social-share" data-initialized="true">
-                                        <a href="#" class="social-share-icon icon-twitter"></a>
-                                        <a href="#" class="social-share-icon icon-google"></a>
-                                        <a href="#" class="social-share-icon icon-facebook"></a>
-                                        <a href="#" class="social-share-icon icon-douban"></a>
-                                        <a href="#" class="social-share-icon icon-qzone"></a>
-                                        <a href="#" class="social-share-icon icon-wechat"></a>
-                                        <a href="#" class="social-share-icon icon-qq"></a>
-                                        <a href="#" class="social-share-icon icon-weibo"></a>
-                                    </div>
+                            <div id="share" style="display: none">
+                                <div class="social-share" data-initialized="true">
+                                    <a href="#" class="social-share-icon icon-twitter"></a>
+                                    <a href="#" class="social-share-icon icon-google"></a>
+                                    <a href="#" class="social-share-icon icon-facebook"></a>
+                                    <a href="#" class="social-share-icon icon-douban"></a>
+                                    <a href="#" class="social-share-icon icon-qzone"></a>
+                                    <a href="#" class="social-share-icon icon-wechat"></a>
+                                    <a href="#" class="social-share-icon icon-qq"></a>
+                                    <a href="#" class="social-share-icon icon-weibo"></a>
                                 </div>
                             </div>
-                            <div class="clear"></div>
                         </div>
                     </div>
                     <div class="article-footer overflow-initial">所属分类：<a href="${config.siteUrl}/type/${article.typeId}" data-original-title="点击查看${article.type.name}分类的文章" data-toggle="tooltip" data-placement="bottom">${article.type.name}</a></div>
@@ -267,6 +526,58 @@
     <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js" type="text/javascript"></script>
 
     <script>
+        // 显示提示信息
+        function showAlert(message, type) {
+            var alertDiv = $('#alertMessage');
+            alertDiv.removeClass('alert-success alert-error').addClass('alert-' + type);
+            alertDiv.text(message).show();
+            
+            // 3秒后自动隐藏成功提示
+            if (type === 'success') {
+                setTimeout(function() {
+                    alertDiv.fadeOut();
+                }, 3000);
+            }
+        }
+        
+        // 收藏成功提示
+        function showFavoriteSuccess(articleId) {
+            showAlert('收藏成功', 'success');
+        }
+        
+        // 初始化Bootstrap alert关闭功能
+        $(document).ready(function() {
+            // Bootstrap alert关闭功能
+            $('.alert-dismissible .close').click(function() {
+                $(this).parent().fadeOut();
+            });
+        });
+        
+        // 分享按钮点击事件
+        $(document).ready(function() {
+            // Bootstrap alert关闭功能
+            $('.alert-dismissible .close').click(function() {
+                $(this).parent().fadeOut();
+            });
+            
+            // 测试alert组件功能
+            console.log('Alert组件初始化完成');
+            console.log('找到', $('.alert-warning').length, '个警告alert');
+            console.log('找到', $('.alert-dismissible').length, '个可关闭alert');
+            
+            $('#share-s').click(function(e) {
+                e.preventDefault();
+                $('#share').toggle();
+            });
+            
+            // 点击其他地方关闭分享菜单
+            $(document).click(function(e) {
+                if (!$(e.target).closest('#share-s').length && !$(e.target).closest('#share').length) {
+                    $('#share').hide();
+                }
+            });
+        });
+        
         var isPrivate = '${article.private}';
         if(isPrivate || isPrivate == 'true') {
             $("#lockModal").modal('show')

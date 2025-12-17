@@ -211,14 +211,58 @@ public class RenderController {
     }
 
     /**
-     * 关于
+     * 关于本站
      *
+     * @param model
      * @return
      */
     @GetMapping("/about")
-    @BussinessLog(value = "进入关于页", platform = PlatformEnum.WEB)
-    public ModelAndView about() {
+    @BussinessLog(value = "进入关于本站页面", platform = PlatformEnum.WEB)
+    public ModelAndView about(Model model) {
         return ResultUtil.view("about");
+    }
+
+    /**
+     * 用户注册页面
+     *
+     * @param model
+     * @return
+     */
+    @GetMapping("/register")
+    @BussinessLog(value = "进入用户注册页面", platform = PlatformEnum.WEB)
+    public ModelAndView register(Model model) {
+        return ResultUtil.view("register");
+    }
+
+    /**
+     * 用户登录页面
+     *
+     * @param model
+     * @return
+     */
+    @GetMapping("/login")
+    @BussinessLog(value = "进入用户登录页面", platform = PlatformEnum.WEB)
+    public ModelAndView login(Model model) {
+        return ResultUtil.view("login");
+    }
+
+    /**
+     * 个人中心页面
+     *
+     * @param model
+     * @return
+     */
+    @GetMapping("/profile")
+    @BussinessLog(value = "进入个人中心页面", platform = PlatformEnum.WEB)
+    public ModelAndView profile(Model model) {
+        // 获取当前登录用户信息
+        User currentUser = SessionUtil.getUser();
+        if (currentUser == null) {
+            // 如果用户未登录，跳转到登录页面
+            return ResultUtil.redirect("/login");
+        }
+        model.addAttribute("user", currentUser);
+        return ResultUtil.view("profile");
     }
 
     /**

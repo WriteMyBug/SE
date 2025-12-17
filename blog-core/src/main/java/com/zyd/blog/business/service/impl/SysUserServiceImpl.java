@@ -2,11 +2,14 @@ package com.zyd.blog.business.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.zyd.blog.business.dto.UserLoginDTO;
+import com.zyd.blog.business.dto.UserRegisterDTO;
 import com.zyd.blog.business.entity.User;
 import com.zyd.blog.business.entity.UserPwd;
 import com.zyd.blog.business.enums.UserNotificationEnum;
 import com.zyd.blog.business.enums.UserPrivacyEnum;
 import com.zyd.blog.business.enums.UserStatusEnum;
+import com.zyd.blog.business.enums.UserTypeEnum;
 import com.zyd.blog.business.service.SysUserService;
 import com.zyd.blog.business.vo.UserConditionVO;
 import com.zyd.blog.framework.exception.ZhydCommentException;
@@ -219,6 +222,56 @@ public class SysUserServiceImpl implements SysUserService {
         user.setSource(source);
         user = sysUserMapper.selectOne(user);
         return null == user ? null : new User(user);
+    }
+
+    @Override
+    public User register(UserRegisterDTO registerDTO) {
+        // 检查邮箱是否已存在
+        User existingUser = getByEmail(registerDTO.getEmail());
+        if (existingUser != null) {
+            throw new ZhydException("该邮箱已被注册");
+        }
+
+        // 创建新用户
+        User user = new User(registerDTO.getEmail(), registerDTO.getPassword());
+        user.setNickname(registerDTO.getNickname());
+        user.setEmail(registerDTO.getEmail());
+        user.setUserType(UserTypeEnum.USER.toString());
+        
+        return insert(user);
+    }
+
+    @Override
+    public User login(UserLoginDTO loginDTO) {
+        // 根据邮箱查找用户
+        User user = getByEmail(loginDTO.getEmail());
+        if (user == null) {
+            throw new ZhydException("邮箱或密码错误");
+        }
+
+        // 验证密码
+        try {
+            String encryptedPassword = PasswordUtil.encrypt(loginDTO.getPassword(), loginDTO.getEmail());
+            if (!user.getPassword().equals(encryptedPassword)) {
+                throw new ZhydException("邮箱或密码错误");
+            }
+        } catch (Exception e) {
+            throw new ZhydException("密码验证失败");
+        }
+
+        // 更新登录信息
+        return updateUserLastLoginInfo(user);
+    }
+
+    @Override
+    public User getByEmail(String email) {
+        if (StringUtils.isEmpty(email)) {
+            return null;
+        }
+        SysUser sysUser = new SysUser();
+        sysUser.setEmail(email);
+        sysUser = sysUserMapper.selectOne(sysUser);
+        return null == sysUser ? null : new User(sysUser);
     }
 
 

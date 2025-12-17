@@ -2,6 +2,8 @@ package com.zyd.blog.business.service;
 
 
 import com.github.pagehelper.PageInfo;
+import com.zyd.blog.business.dto.UserLoginDTO;
+import com.zyd.blog.business.dto.UserRegisterDTO;
 import com.zyd.blog.business.entity.User;
 import com.zyd.blog.business.entity.UserPwd;
 import com.zyd.blog.business.vo.UserConditionVO;
@@ -69,4 +71,28 @@ public interface SysUserService extends AbstractService<User, Long> {
      * @return
      */
     User getByUuidAndSource(String uuid, String source);
+
+    /**
+     * 用户注册
+     *
+     * @param registerDTO
+     * @return
+     */
+    User register(UserRegisterDTO registerDTO);
+
+    /**
+     * 用户登录
+     *
+     * @param loginDTO
+     * @return
+     */
+    User login(UserLoginDTO loginDTO);
+
+    /**
+     * 根据邮箱查询用户
+     *
+     * @param email
+     * @return
+     */
+    User getByEmail(String email);
 }
