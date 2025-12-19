@@ -4,6 +4,7 @@ import com.zyd.blog.business.consts.SessionConst;
 import com.zyd.blog.business.entity.User;
 import com.zyd.blog.framework.holder.RequestHolder;
 
+import javax.servlet.http.HttpSession;
 import java.util.UUID;
 
 /**
@@ -32,7 +33,11 @@ public class SessionUtil {
      * @return User
      */
     public static User getUser() {
-        return (User) RequestHolder.getSession(SessionConst.USER_SESSION_KEY);
+        HttpSession session = RequestHolder.getSession();
+        if (session == null) {
+            return null;
+        }
+        return (User) session.getAttribute(SessionConst.USER_SESSION_KEY);
     }
 
     /**
@@ -41,14 +46,20 @@ public class SessionUtil {
      * @param user
      */
     public static void setUser(User user) {
-        RequestHolder.setSession(SessionConst.USER_SESSION_KEY, user);
+        HttpSession session = RequestHolder.getSession();
+        if (session != null) {
+            session.setAttribute(SessionConst.USER_SESSION_KEY, user);
+        }
     }
 
     /**
      * 删除session信息
      */
     public static void removeUser() {
-        RequestHolder.removeSession(SessionConst.USER_SESSION_KEY);
+        HttpSession session = RequestHolder.getSession();
+        if (session != null) {
+            session.removeAttribute(SessionConst.USER_SESSION_KEY);
+        }
     }
 
     /**

@@ -416,9 +416,6 @@ $(function () {
             wmUrl: appConfig.wwwPath,
             wmDesc: appConfig.editorAlert || '讲文明、要和谐'
         });
-        $("#comment-form-btn").click(function () {
-            $.comment.submit($(this));
-        });
     }
 
     /**

@@ -8,6 +8,7 @@ import com.zyd.blog.business.enums.ArticleStatusEnum;
 import com.zyd.blog.business.enums.PlatformEnum;
 import com.zyd.blog.business.service.*;
 import com.zyd.blog.business.vo.ArticleConditionVO;
+import com.zyd.blog.framework.object.ResponseVO;
 import com.zyd.blog.util.ArticleUtil;
 import com.zyd.blog.util.ResultUtil;
 import com.zyd.blog.util.SessionUtil;
@@ -47,6 +48,10 @@ public class RenderController {
     private SysLinkService sysLinkService;
     @Autowired
     private SysUpdateRecordeService updateRecordeService;
+    @Autowired
+    private BizUserFavoritesService bizUserFavoritesService;
+    @Autowired
+    private BizUserHistoryService bizUserHistoryService;
 
     /**
      * 加载首页的数据
@@ -201,6 +206,13 @@ public class RenderController {
                 article.setRequiredAuth(false);
             }
         }
+        
+        // 记录浏览历史
+        User currentUser = SessionUtil.getUser();
+        if (currentUser != null) {
+            bizUserHistoryService.addHistory(currentUser.getId(), articleId);
+        }
+        
         model.addAttribute("article", article);
         // 上一篇下一篇
         model.addAttribute("other", bizArticleService.getPrevAndNextArticles(article.getCreateTime()));
@@ -338,6 +350,40 @@ public class RenderController {
     public ModelAndView updateLog(Model model) {
         model.addAttribute("list", updateRecordeService.listAll());
         return ResultUtil.view("updateLog");
+    }
+
+    /**
+     * 获取用户收藏的文章列表
+     *
+     * @return 收藏的文章列表
+     */
+    @GetMapping("/user/favorites")
+    @BussinessLog(value = "获取用户收藏的文章列表", platform = PlatformEnum.WEB)
+    public ResponseVO getFavorites() {
+        User currentUser = SessionUtil.getUser();
+        if (currentUser == null) {
+            return ResultUtil.error("用户未登录");
+        }
+        List<Long> articleIds = bizUserFavoritesService.listArticleIdsByUserId(currentUser.getId());
+        List<Article> articles = bizArticleService.listArticlesByIds(articleIds);
+        return ResultUtil.success(articles);
+    }
+
+    /**
+     * 获取用户浏览历史的文章列表
+     *
+     * @return 浏览历史的文章列表
+     */
+    @GetMapping("/user/history")
+    @BussinessLog(value = "获取用户浏览历史的文章列表", platform = PlatformEnum.WEB)
+    public ResponseVO getHistory() {
+        User currentUser = SessionUtil.getUser();
+        if (currentUser == null) {
+            return ResultUtil.error("用户未登录");
+        }
+        List<Long> articleIds = bizUserHistoryService.listArticleIdsByUserId(currentUser.getId());
+        List<Article> articles = bizArticleService.listArticlesByIds(articleIds);
+        return ResultUtil.success(articles);
     }
 
 }

@@ -480,4 +480,19 @@ public class BizArticleServiceImpl implements BizArticleService {
         }
         return list;
     }
+
+    @Override
+    public List<Article> listArticlesByIds(List<Long> articleIds) {
+        if (CollectionUtils.isEmpty(articleIds)) {
+            return new ArrayList<>();
+        }
+        Example example = new Example(BizArticle.class);
+        example.createCriteria().andIn("id", articleIds);
+        example.orderBy("createTime").desc();
+        List<BizArticle> list = bizArticleMapper.selectByExample(example);
+        if (CollectionUtils.isEmpty(list)) {
+            return new ArrayList<>();
+        }
+        return list.stream().map(Article::new).collect(Collectors.toList());
+    }
 }

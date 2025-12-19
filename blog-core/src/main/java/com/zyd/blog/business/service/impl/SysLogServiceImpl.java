@@ -59,7 +59,7 @@ public class SysLogServiceImpl implements SysLogService {
 
     @Async
     @Override
-    public void asyncSaveSystemLog(PlatformEnum platform, String bussinessName, ServletRequestAttributes servletRequestAttributes) {
+    public void asyncSaveSystemLog(PlatformEnum platform, String bussinessName, ServletRequestAttributes servletRequestAttributes, User user) {
         RequestContextHolder.setRequestAttributes(servletRequestAttributes);
 
         String ua = RequestUtil.getUa();
@@ -72,7 +72,6 @@ public class SysLogServiceImpl implements SysLogService {
         sysLog.setUa(ua);
         sysLog.setSpiderType(WebSpiderUtils.parseUa(ua));
         sysLog.setParams(JSONObject.toJSONString(RequestUtil.getParametersMap()));
-        User user = SessionUtil.getUser();
         if (user != null) {
             sysLog.setUserId(user.getId());
             sysLog.setContent(String.format("用户: [%s] | 操作: %s", user.getUsername(), bussinessName));

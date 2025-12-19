@@ -124,4 +124,12 @@ public interface BizArticleService extends AbstractService<Article, Long> {
      */
     void batchUpdateStatus(Long[] ids, boolean status);
 
+    /**
+     * 根据文章ID列表获取文章列表
+     *
+     * @param articleIds 文章ID列表
+     * @return 文章列表
+     */
+    List<Article> listArticlesByIds(List<Long> articleIds);
+
 }

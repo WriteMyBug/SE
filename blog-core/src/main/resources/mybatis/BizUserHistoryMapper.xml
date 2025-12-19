@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.zyd.blog.persistence.mapper.BizUserHistoryMapper">
+    <resultMap id="rm" type="com.zyd.blog.persistence.beans.BizUserHistory">
+        <result property="id" jdbcType="BIGINT" column="id"/>
+        <result property="userId" jdbcType="BIGINT" column="user_id"/>
+        <result property="articleId" jdbcType="BIGINT" column="article_id"/>
+        <result property="viewTime" jdbcType="TIMESTAMP" column="view_time"/>
+        <result property="createTime" jdbcType="TIMESTAMP" column="create_time"/>
+        <result property="updateTime" jdbcType="TIMESTAMP" column="update_time"/>
+    </resultMap>
+
+    <select id="listArticleIdsByUserId" parameterType="long" resultType="long">
+        SELECT
+            t.article_id
+        FROM
+            biz_user_history t
+        WHERE
+            t.user_id = #{userId}
+        ORDER BY t.view_time DESC
+    </select>
+
+    <delete id="deleteByUserIdAndArticleId" parameterType="map">
+        DELETE FROM
+            biz_user_history
+        WHERE
+            user_id = #{userId}
+          AND article_id = #{articleId}
+    </delete>
+
+    <select id="countByUserIdAndArticleId" parameterType="map" resultType="int">
+        SELECT
+            COUNT(*)
+        FROM
+            biz_user_history
+        WHERE
+            user_id = #{userId}
+          AND article_id = #{articleId}
+    </select>
+
+    <update id="updateViewTimeByUserIdAndArticleId" parameterType="map">
+        UPDATE
+            biz_user_history
+        SET
+            view_time = CURRENT_TIMESTAMP,
+            update_time = CURRENT_TIMESTAMP
+        WHERE
+            user_id = #{userId}
+          AND article_id = #{articleId}
+    </update>
+
+    <select id="listArticlesWithViewTimeByUserId" parameterType="long" resultType="map">
+        SELECT
+            a.id,
+            a.title,
+            h.view_time AS viewTime
+        FROM
+            biz_user_history h
+        INNER JOIN biz_article a ON h.article_id = a.id
+        WHERE
+            h.user_id = #{userId}
+        ORDER BY h.view_time DESC
+    </select>
+</mapper>

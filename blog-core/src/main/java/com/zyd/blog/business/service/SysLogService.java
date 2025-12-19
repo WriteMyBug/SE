@@ -24,5 +24,5 @@ public interface SysLogService extends AbstractService<Log, Integer> {
      */
     PageInfo<Log> findPageBreakByCondition(LogConditionVO vo);
 
-    void asyncSaveSystemLog(PlatformEnum platform, String bussinessName, ServletRequestAttributes servletRequestAttributes);
+    void asyncSaveSystemLog(PlatformEnum platform, String bussinessName, ServletRequestAttributes servletRequestAttributes, com.zyd.blog.business.entity.User user);
 }

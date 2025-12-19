@@ -64,23 +64,158 @@ $.extend({
             $box.html(commentBox);
             // 初始化并缓存常用的dom元素
             $.comment.initDom();
-            // 创建编辑框
-            this._simplemde = $.comment.createEdit(op);
-            $.comment.loadCommentList($box);
-            $.comment.initValidatorPlugin();
+            // 延迟创建编辑框，确保DOM元素完全加载
+            var self = this;
+            setTimeout(function() {
+                self._simplemde = $.comment.createEdit(op);
+                $.comment.loadCommentList($box);
+                $.comment.initValidatorPlugin();
+                
+                // 绑定提交评论按钮点击事件
+                $('#comment-form-btn').on('click', function() {
+                    console.log('提交按钮被点击');
+                    $.comment.submit(this);
+                });
+                
+                // 添加调试日志，确认按钮绑定成功
+                console.log('评论提交按钮绑定完成:', $('#comment-form-btn')[0]);
+            }, 100);
         },
         createEdit: function (options) {
+            // 定义表情包列表
+            var emojis = [
+                "😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣",
+                "😊", "😇", "🙂", "🙃", "😉", "😌", "😍", "🥰",
+                "😘", "😗", "😙", "😚", "😋", "😛", "😝", "😜",
+                "🤪", "🤨", "🧐", "🤓", "😎", "🤩", "🥳", "😏",
+                "😒", "😞", "😔", "😟", "😕", "🙁", "☹️", "😣",
+                "😖", "😫", "😩", "🥺", "😢", "😭", "😤", "😠",
+                "😡", "🤬", "🤯", "😳", "🥵", "🥶", "😱", "😨",
+                "😰", "😥", "😓", "🤗", "🤔", "🤭", "🤫", "🤥",
+                "😶", "😐", "😑", "😬", "🙄", "😯", "😦", "😧",
+                "😮", "😲", "🥱", "😴", "🤤", "😪", "😵", "🤐",
+                "🥴", "🤢", "🤮", "🤧", "😷", "🤒", "🤕", "🤑"
+            ];
+            
+            // 创建表情包选择器HTML
+            var emojiPickerHTML = '<div id="emoji-picker" style="position: absolute; bottom: 100%; left: 0; background: white; border: 1px solid #ccc; border-radius: 4px; padding: 10px; z-index: 1000; display: none; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">' +
+                '<div style="max-height: 150px; overflow-y: auto; min-width: 300px;">' +
+                '<table style="border-collapse: collapse; width: 100%;">';
+            
+            for (var i = 0; i < emojis.length; i += 8) {
+                emojiPickerHTML += '<tr>';
+                for (var j = 0; j < 8 && (i + j) < emojis.length; j++) {
+                    emojiPickerHTML += '<td style="padding: 8px; cursor: pointer; font-size: 24px; text-align: center; border: 1px solid #f0f0f0;" data-emoji="' + emojis[i + j] + '">' + emojis[i + j] + '</td>';
+                }
+                emojiPickerHTML += '</tr>';
+            }
+            
+            emojiPickerHTML += '</table></div></div>';
+            
+            // 创建SimpleMDE编辑器
+            // 先定义自定义表情按钮
+            var emojiButton = {
+                name: "emoji",
+                action: function(editor) {
+                    // 显示/隐藏表情选择器
+                    var picker = document.getElementById("emoji-picker");
+                    if (picker) {
+                        picker.style.display = picker.style.display === "none" ? "block" : "none";
+                    }
+                },
+                className: "fa fa-smile-o",
+                title: "表情"
+            };
+            
             var simplemde = new SimpleMDE({
                 element: document.getElementById("comment_content"),
-                toolbar: ["bold", "italic", "|", "code", "quote", "|", "preview", "|", "guide"],
+                toolbar: ["bold", "italic", "|", "code", "quote", "|", emojiButton, "preview", "|", "guide"],
                 autoDownloadFontAwesome: false,
-                // autofocus: true,
                 placeholder: options.placeholder || "说点什么吧",
                 renderingConfig: {
                     codeSyntaxHighlighting: true
                 },
-                tabSize: 4
+                tabSize: 4,
+                toolbarGuideIcon: "❓",
+                toolbarButtonClassPrefix: "fa"
             });
+            
+            // 为表情按钮添加点击事件
+            try {
+                // 等待DOM加载完成
+                setTimeout(function() {
+                    // 获取表情按钮
+                    var emojiButtonElement = document.querySelector('.editor-toolbar .fa-smile-o');
+                    console.log('找到表情按钮:', emojiButtonElement);
+                    
+                    if (emojiButtonElement) {
+                        // 添加点击事件
+                        emojiButtonElement.addEventListener('click', function() {
+                            var picker = document.getElementById("emoji-picker");
+                            if (picker) {
+                                picker.style.display = picker.style.display === "none" ? "block" : "none";
+                            }
+                        });
+                        
+                        // 添加样式确保按钮可见
+                        emojiButtonElement.style.cursor = "pointer";
+                        emojiButtonElement.style.margin = "0 3px";
+                        emojiButtonElement.style.display = "inline-block";
+                        emojiButtonElement.style.padding = "4px 6px";
+                        emojiButtonElement.style.fontSize = "16px";
+                        
+                        console.log('表情按钮事件绑定完成');
+                    } else {
+                        console.error('未找到表情按钮');
+                    }
+                }, 50);
+            } catch (e) {
+                console.error('添加表情按钮事件失败:', e);
+            }
+            
+            // 添加表情包选择器到页面
+            var editorElement = document.getElementById("comment_content");
+            if (editorElement) {
+                // 将表情包选择器直接添加到编辑器容器，不嵌套额外div
+                var editorParent = editorElement.parentElement;
+                editorParent.insertAdjacentHTML('beforeend', emojiPickerHTML);
+                console.log('表情选择器已添加到DOM:', document.getElementById('emoji-picker'));
+            }
+            
+            // 表情按钮已在SimpleMDE配置中直接定义，无需手动添加
+            
+            // 点击表情包插入到编辑器
+            document.addEventListener("click", function(e) {
+                var picker = document.getElementById("emoji-picker");
+                if (e.target.dataset.emoji) {
+                    simplemde.codemirror.replaceSelection(e.target.dataset.emoji);
+                    if (picker) {
+                        picker.style.display = "none";
+                    }
+                    // 更新隐藏的textarea
+                    $("textarea[name=content]").val(simplemde.markdown(simplemde.value()));
+                } else if (e.target.closest(".fa-smile-o")) {
+                    // 点击表情按钮显示/隐藏表情选择器
+                    if (picker) {
+                        if (picker.style.display === "none" || picker.style.display === "") {
+                            picker.style.display = "block";
+                            console.log('表情选择器已显示');
+                        } else {
+                            picker.style.display = "none";
+                            console.log('表情选择器已隐藏');
+                        }
+                    } else {
+                        console.error('未找到表情选择器元素');
+                    }
+                } else if (!e.target.closest("#emoji-picker")) {
+                    // 点击其他地方关闭表情包选择器
+                    if (picker) {
+                        picker.style.display = "none";
+                    }
+                }
+            });
+            
+            // 监听编辑器内容变化，更新隐藏的textarea
             simplemde.codemirror.on("change", function(){
                 $("textarea[name=content]").val(simplemde.markdown(simplemde.value()));
             });
@@ -224,10 +359,9 @@ $.extend({
             var $this = $(target);
             $this.button('loading');
             var data = $("#comment-form").serialize();
-            if(!oauthConfig.loginUserId) {
+            if(typeof oauthConfig === 'undefined' || !oauthConfig.loginUserId) {
                 var detail = localStorage.getItem(this.detailKey);
-                if(!detail){
-                }else{
+                if(detail){
                     var detailInfoJson = $.tool.parseFormSerialize(detail);
                     $.comment._detailForm.find("input").each(function () {
                         var $this = $(this);
@@ -239,7 +373,6 @@ $.extend({
                     var $img = $.comment._detailForm.find('img');
                     $img.attr('src', detailInfoJson.avatar);
                     $img.removeClass('hide');
-
                 }
                 this._commentDetailModal.modal('show');
                 this._closeBtn.unbind('click');
@@ -300,12 +433,14 @@ $.extend({
 
 
             function submitForm(data) {
-                console.log(data);
+                console.log('提交的数据:', data);
+                console.log('文章ID:', $.comment.sid);
                 $.ajax({
                     type: "post",
                     url: "/api/comment",
                     data: data + '&sid=' + $.comment.sid,
                     success: function (json) {
+                        console.log('提交成功:', json);
                         $.alert.ajaxSuccess(json);
 
                         $.comment._commentDetailModal.modal('hide');
@@ -320,8 +455,10 @@ $.extend({
                             }, 3000);
                         }, 1000);
                     },
-                    error: function (data) {
-                        // console.log(data);
+                    error: function (xhr, status, error) {
+                        console.log('提交失败:', xhr.responseText);
+                        console.log('错误状态:', status);
+                        console.log('错误信息:', error);
                         $.alert.ajaxError();
                         $this.button('reset');
                     }

@@ -67,6 +67,8 @@ public class RestApiController {
     private JsApiTicketComponent jsApiTicketComponent;
     @Autowired
     private SysConfigService sysConfigService;
+    @Autowired
+    private BizUserFavoritesService bizUserFavoritesService;
 
     @PostMapping("/autoLink")
     @BussinessLog(value = "自助申请友链", platform = PlatformEnum.WEB)
@@ -162,6 +164,28 @@ public class RestApiController {
             return ResultUtil.error(e.getMessage());
         }
         return ResultUtil.success("");
+    }
+
+    @PostMapping("/toggleFavorite/{id}")
+    @BussinessLog(value = "收藏/取消收藏文章{1}", platform = PlatformEnum.WEB)
+    public ResponseVO toggleFavorite(@PathVariable("id") Long id) {
+        try {
+            boolean isFavorited = bizUserFavoritesService.toggleFavorite(id);
+            return ResultUtil.success(isFavorited ? "收藏成功" : "取消收藏成功", isFavorited);
+        } catch (Exception e) {
+            return ResultUtil.error(e.getMessage());
+        }
+    }
+
+    @GetMapping("/isFavorited/{id}")
+    @BussinessLog(value = "检查文章{1}是否被收藏", platform = PlatformEnum.WEB, save = false)
+    public ResponseVO isFavorited(@PathVariable("id") Long id) {
+        try {
+            boolean isFavorited = bizUserFavoritesService.isFavorited(id);
+            return ResultUtil.success("", isFavorited);
+        } catch (Exception e) {
+            return ResultUtil.error(e.getMessage());
+        }
     }
 
     @PostMapping("/listNotice")

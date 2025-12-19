@@ -68,7 +68,14 @@ public class BussinessLogAspect {
         }
 
         ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        logService.asyncSaveSystemLog(platform, bussinessName, servletRequestAttributes);
+        // 在调用异步方法前获取用户信息，避免在异步方法中访问会话
+        com.zyd.blog.business.entity.User user = null;
+        try {
+            user = com.zyd.blog.util.SessionUtil.getUser();
+        } catch (Exception e) {
+            // 忽略会话获取异常
+        }
+        logService.asyncSaveSystemLog(platform, bussinessName, servletRequestAttributes, user);
     }
 
 

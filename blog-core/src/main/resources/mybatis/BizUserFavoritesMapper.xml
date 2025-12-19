@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.zyd.blog.persistence.mapper.BizUserFavoritesMapper">
+    <resultMap id="rm" type="com.zyd.blog.persistence.beans.BizUserFavorites">
+        <result property="id" jdbcType="BIGINT" column="id"/>
+        <result property="userId" jdbcType="BIGINT" column="user_id"/>
+        <result property="articleId" jdbcType="BIGINT" column="article_id"/>
+        <result property="createTime" jdbcType="TIMESTAMP" column="create_time"/>
+        <result property="updateTime" jdbcType="TIMESTAMP" column="update_time"/>
+    </resultMap>
+
+    <select id="listArticleIdsByUserId" parameterType="long" resultType="long">
+        SELECT
+            t.article_id
+        FROM
+            biz_user_favorites t
+        WHERE
+            t.user_id = #{userId}
+        ORDER BY t.create_time DESC
+    </select>
+
+    <delete id="deleteByUserIdAndArticleId" parameterType="map">
+        DELETE FROM
+            biz_user_favorites
+        WHERE
+            user_id = #{userId}
+          AND article_id = #{articleId}
+    </delete>
+
+    <select id="countByUserIdAndArticleId" parameterType="map" resultType="int">
+        SELECT
+            COUNT(*)
+        FROM
+            biz_user_favorites
+        WHERE
+            user_id = #{userId}
+          AND article_id = #{articleId}
+    </select>
+</mapper>

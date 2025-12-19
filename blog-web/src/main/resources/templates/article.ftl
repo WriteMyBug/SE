@@ -10,15 +10,15 @@
             margin: 20px 0;
             display: none;
         }
-        .alert-success {
-            background-color: #dff0d8;
-            border: 1px solid #d6e9c6;
-            color: #3c763d;
+        #alertMessage.alert-success {
+            background-color: #dff0d8 !important;
+            border: 1px solid #d6e9c6 !important;
+            color: #3c763d !important;
         }
-        .alert-error {
-            background-color: #f2dede;
-            border: 1px solid #ebccd1;
-            color: #a94442;
+        #alertMessage.alert-error {
+            background-color: #f2dede !important;
+            border: 1px solid #ebccd1 !important;
+            color: #a94442 !important;
         }
         
         /* Bootstrap alert 样式增强 */
@@ -139,8 +139,13 @@
             background: #fff;
             border: 1px solid rgba(0, 0, 0, 0.1);
             width: 120px;
-            display: block;
-            padding-left: 15px;
+            text-align: center;
+            padding: 8px 15px;
+            border-radius: 4px;
+            transition: all 0.2s ease-in;
+            text-decoration: none;
+            display: inline-block;
+            color: #333;
         }
         
         .button-group .favorite a:hover {
@@ -329,7 +334,7 @@
                     </div>
                     <div class="separateline"><span>正文到此结束</span></div>
                     <#-- 提示消息区域 -->
-                    <div id="alertMessage" class="alert" style="display: none; margin: 20px 0; padding: 15px; border-radius: 4px;"></div>
+                    <div id="alertMessage" style="display: none; margin: 20px 0; padding: 15px; border-radius: 4px;"></div>
                     <div id="social" style="margin-bottom: 45px;">
                         <div class="social-main">
                             <div class="button-group">
@@ -338,8 +343,8 @@
                                 </span>
                                 <#-- 收藏按钮 - 仅对登录用户可见 -->
                                 <#if user??>
-                                <span class="like favorite">
-                                    <a href="javascript:;" data-id="${article.id?c}" title="收藏" onclick="showFavoriteSuccess('${article.id?c}')"><i class="fa fa-star"></i>收藏</a>
+                                <span class="favorite">
+                                    <a href="javascript:;" data-id="${article.id?c}" title="收藏" onclick="toggleFavorite(${article.id?c}, event);"><i class="fa fa-star"></i>收藏</a>
                                 </span>
                                 </#if>
                                 <span class="share-s">
@@ -526,11 +531,28 @@
     <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js" type="text/javascript"></script>
 
     <script>
-        // 显示提示信息
+        // 显示提示信息 - 简化版本，直接设置样式
         function showAlert(message, type) {
             var alertDiv = $('#alertMessage');
-            alertDiv.removeClass('alert-success alert-error').addClass('alert-' + type);
-            alertDiv.text(message).show();
+            
+            // 确保元素存在
+            if (!alertDiv.length) {
+                console.error('Alert message div not found!');
+                return;
+            }
+            
+            // 直接设置基础样式
+            var baseStyle = 'padding: 15px; border-radius: 4px; margin: 20px 0; display: block;';
+            var successStyle = 'background-color: #dff0d8; border: 1px solid #d6e9c6; color: #3c763d;';
+            var errorStyle = 'background-color: #f2dede; border: 1px solid #ebccd1; color: #a94442;';
+            
+            if (type === 'success') {
+                alertDiv.attr('style', baseStyle + successStyle);
+            } else {
+                alertDiv.attr('style', baseStyle + errorStyle);
+            }
+            
+            alertDiv.text(message);
             
             // 3秒后自动隐藏成功提示
             if (type === 'success') {
@@ -540,9 +562,54 @@
             }
         }
         
-        // 收藏成功提示
-        function showFavoriteSuccess(articleId) {
-            showAlert('收藏成功', 'success');
+        // 收藏功能处理 - 简化版本，确保可靠性
+        function toggleFavorite(articleId, event) {
+            // 调试信息
+            console.log('toggleFavorite called with articleId:', articleId);
+            
+            // 获取当前点击的按钮 - 使用事件源对象
+            var currentBtn = event.target.closest('.favorite a');
+            console.log('Current button:', currentBtn);
+            
+            // 如果找不到按钮，尝试通过data-id查找
+            if (!currentBtn) {
+                currentBtn = $('.favorite a[data-id="' + articleId + '"]');
+                console.log('Button found by data-id:', currentBtn);
+            }
+            
+            // 显示临时提示，确保函数执行
+            showAlert('正在处理收藏...', 'success');
+            
+            $.ajax({
+                type: "post",
+                url: "/api/favorites/toggle/" + articleId,
+                success: function (json) {
+                    console.log('AJAX success, response:', json);
+                    
+                    // 兼容不同的响应格式
+                    var success = json.code === 200 || json.status === 200;
+                    var isFavorited = success ? json.data : false;
+                    
+                    console.log('Success:', success, 'isFavorited:', isFavorited);
+                    
+                    if (success) {
+                        if (isFavorited) {
+                            $(currentBtn).html('<i class="fa fa-star" style="color: #ffc107;"></i>已收藏');
+                            showAlert('收藏成功', 'success');
+                        } else {
+                            $(currentBtn).html('<i class="fa fa-star"></i>收藏');
+                            showAlert('取消收藏成功', 'success');
+                        }
+                    } else {
+                        showAlert(json.message || json.msg || '操作失败', 'error');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('AJAX error:', status, error);
+                    console.error('Response:', xhr.responseText);
+                    showAlert('网络错误，请重试', 'error');
+                }
+            });
         }
         
         // 初始化Bootstrap alert关闭功能

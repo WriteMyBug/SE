@@ -427,6 +427,38 @@ CREATE TABLE `biz_page`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 
+-- ----------------------------
+-- Table structure for biz_user_favorites
+-- ----------------------------
+DROP TABLE IF EXISTS `biz_user_favorites`;
+CREATE TABLE `biz_user_favorites`  (
+    `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) UNSIGNED NOT NULL COMMENT '用户ID',
+    `article_id` bigint(20) UNSIGNED NOT NULL COMMENT '文章ID',
+    `create_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP COMMENT '添加时间',
+    `update_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE INDEX `idx_user_article`(`user_id`, `article_id`) USING BTREE,
+    INDEX `idx_article_id`(`article_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 0 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Table structure for biz_user_history
+-- ----------------------------
+DROP TABLE IF EXISTS `biz_user_history`;
+CREATE TABLE `biz_user_history`  (
+    `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) UNSIGNED NOT NULL COMMENT '用户ID',
+    `article_id` bigint(20) UNSIGNED NOT NULL COMMENT '文章ID',
+    `view_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP COMMENT '浏览时间',
+    `create_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP COMMENT '添加时间',
+    `update_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    INDEX `idx_user_article`(`user_id`, `article_id`) USING BTREE,
+    INDEX `idx_article_id`(`article_id`) USING BTREE,
+    INDEX `idx_view_time`(`view_time`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 0 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Compact;
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ----------------------------
